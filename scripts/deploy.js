@@ -4,28 +4,33 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat");
+
+// ethers.js comes built in to Hardhat
+// ether.js is a really nice library to work with ethereum
+
+// Import ethers from Hardhat package
+const { ethers } = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  /*
+A ContractFactory in ethers.js is an abstraction used to deploy new smart contracts,
+so nftContract here is a factory for instances of our skNFT contract.
+*/
+  const nftContract = await ethers.getContractFactory("skNFT");
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
-
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(
-    `Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+  //1. here we deploy the contract
+  const deployedNFTContract = await nftContract.deploy();
+  //2. wait for the contract to deploy
+  await deployedNFTContract.deployed();
+  //3. print the address of the deployed contract
+  console.log("NFT Contract Address:", deployedNFTContract.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Call the main function and catch if there is any errors
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
